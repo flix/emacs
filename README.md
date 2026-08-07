@@ -45,7 +45,7 @@ eglot-semtok-request-fontification` in the first buffer you open.
   :vc (:url "https://github.com/gongo/emacs-toml"
             :branch "master"))
 
-(Use-package flix-mode
+(use-package flix-mode
   :vc (:url "https://github.com/flix/emacs"
             :branch "master")
   :mode "\\.flix\\'"
