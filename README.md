@@ -46,8 +46,8 @@ eglot-semtok-request-fontification` in the first buffer you open.
             :branch "master"))
 
 (Use-package flix-mode
-  :vc (:url "https://codeberg.org/mdiin/flix-mode"
-            :branch "main")
+  :vc (:url "https://github.com/flix/emacs"
+            :branch "master")
   :mode "\\.flix\\'"
 
   :hook ((flix-mode . flix-mode-ensure))

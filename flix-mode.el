@@ -1,11 +1,11 @@
 ;;; flix-mode.el --- Major mode for the Flix programming language -*- lexical-binding: t; -*-
 
 ;;; Copyright (C) 2025 Matthias Varberg Ingesman
-;;; SPDX-License-Identifier: GPL-3.0-or-later
+;;; SPDX-License-Identifier: Apache-2.0
 
 ;;; Author: Matthias Varberg Ingesman <matthias@ingesman.dk>
 ;;; Created: 23. Feb 2025
-;;; URL: https://codeberg.org/mdiin/flix-mode
+;;; URL: https://github.com/flix/emacs
 
 ;;; Package-Requires: ((emacs "29.0"))
 
