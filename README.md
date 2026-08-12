@@ -45,7 +45,7 @@ eglot-semtok-request-fontification` in the first buffer you open.
   :vc (:url "https://github.com/gongo/emacs-toml"
             :branch "master"))
 
-(Use-package flix-mode
+(use-package flix-mode
   :vc (:url "https://github.com/flix/emacs"
             :branch "master")
   :mode "\\.flix\\'"
@@ -130,7 +130,88 @@ eglot-semtok-request-fontification` in the first buffer you open.
 
 ### lsp-mode
 
-Contributions for setting up lsp-mode are welcome.
+**Dependencies**
+
+- flix-mode (this repo, install using `M-x package-vc-install` and pasting this URL)
+- lsp-mode (available on MELPA: https://github.com/emacs-lsp/lsp-mode )
+- toml (use https://github.com/gongo/emacs-toml)
+
+**Notes**
+
+`lsp-mode` provides semantic tokens support out of the box, so no extra package
+is needed for LSP-based highlighting; it just has to be enabled (see below).
+
+The Flix LSP server resolves the LSP `workspaceFolder` name as a *relative*
+path when it scans the project. Because `lsp-mode` sends the directory's short
+name rather than a full path, the server's working directory has to be the
+**parent** of the workspace root for the project scan to succeed. Without this,
+only the opened file is compiled and you get `Orphaned module` / `Undefined
+use` errors. The advice below handles that.
+
+flix-mode locates the project (and thus the compiler jar) through `project.el`.
+On plain Emacs, `project.el` doesn't know that `flix.toml` marks a project
+root, so the config below registers a `project-find-functions` entry for it.
+
+```elisp
+;; This is not just the toml package in MELPA
+(use-package toml
+  :vc (:url "https://github.com/gongo/emacs-toml"
+            :branch "master"))
+
+;; Let project.el recognize a Flix project by its flix.toml, so that
+;; flix-mode's project-based jar resolution works. (flix-mode locates the
+;; project via project.el; without this, plain Emacs doesn't know flix.toml
+;; marks a project root.)
+(require 'project)
+(defun flix/project-find (dir)
+  (when-let ((root (locate-dominating-file dir "flix.toml")))
+    (cons 'transient root)))
+(add-to-list 'project-find-functions #'flix/project-find)
+
+(use-package flix-mode
+  :vc (:url "https://github.com/flix/emacs"
+            :branch "master")
+  :mode "\\.flix\\'"
+
+  ;; Enable semantic tokens (server-provided highlighting) before LSP starts,
+  ;; then start the server.
+  :hook ((flix-mode . (lambda ()
+                        (setq-local lsp-semantic-tokens-enable t)
+                        (lsp-deferred))))
+
+  :commands flix-mode)
+
+;; lsp-mode configuration
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :init
+  ;; Set the server's working directory to the parent of the workspace root in
+  ;; flix-mode buffers, so the Flix LSP server's relative-path project scan
+  ;; resolves correctly.
+  (defun flix/lsp-default-directory-parent-of-root (orig-fn &rest args)
+    (if (derived-mode-p 'flix-mode)
+        (let ((root (lsp-workspace-root)))
+          (if root
+              (file-name-directory (directory-file-name root))
+            (apply orig-fn args)))
+      (apply orig-fn args)))
+
+  :config
+  (add-to-list 'lsp-language-id-configuration '(flix-mode . "flix"))
+  (advice-add 'lsp--default-directory-for-connection :around
+              #'flix/lsp-default-directory-parent-of-root)
+  ;; Register the Flix LSP client: launch the compiler jar in LSP mode.
+  ;; flix-mode-ensure downloads the jar if needed; flix-mode-server-path
+  ;; returns ("java" "-jar" <jar> "lsp").
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     (lambda ()
+                       (flix-mode-ensure)
+                       (flix-mode-server-path nil)))
+    :activation-fn (lsp-activate-on "flix")
+    :server-id 'flix-ls)))
+```
 
 ## Customizing
 
