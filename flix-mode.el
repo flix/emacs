@@ -108,6 +108,7 @@ The argument is intentionally ignored."
 (define-derived-mode flix-mode prog-mode "Flix"
   "Major mode for the Flix programming language.")
 
+;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.flix\\'" . flix-mode))
 
 (provide 'flix-mode)
