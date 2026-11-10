@@ -48,8 +48,6 @@ eglot-semtok-request-fontification` in the first buffer you open.
 (use-package flix-mode
   :vc (:url "https://github.com/flix/emacs"
             :branch "master")
-  :mode "\\.flix\\'"
-
   :hook ((flix-mode . flix-mode-ensure))
 
   :commands flix-mode)
@@ -171,8 +169,6 @@ root, so the config below registers a `project-find-functions` entry for it.
 (use-package flix-mode
   :vc (:url "https://github.com/flix/emacs"
             :branch "master")
-  :mode "\\.flix\\'"
-
   ;; Enable semantic tokens (server-provided highlighting) before LSP starts,
   ;; then start the server.
   :hook ((flix-mode . (lambda ()
